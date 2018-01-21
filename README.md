@@ -1,7 +1,7 @@
 # RSA (Rivest–Shamir–Adleman)
 
 # Detailed Explanations : How it works?
-RSA works using a **public key** and a **private key** and it's strength relies on the hardness of **prime factorization** (a set of prime numbers that you multiply together to get another number). The first step in the RSA algorithm involves generating the keys.
+RSA works using a **public key** and a **private key** and its strength relies on the hardness of **prime factorization** (a set of prime numbers that you multiply together to get another number). The first step in the RSA algorithm involves generating the keys.
 ## Generating key
 ### Choosing two primes
 This is done in generate_keypair(private_key, public_key) function.
@@ -57,7 +57,7 @@ The **public key pair** is (**e**, **n**). This is what the server sends us, its
 The **private key pair** is (**d**, **n**). This can not be shared with anyone. It will be used to decrypt messages encrypted with the public key.
 
 
-### Encrypting
+# Encrypting
 For encrypting this is what we do:
 ``` (m^e) % n```
 This function will use the public key to encrypt our plain text. We'll encrypt the string "asd".
@@ -71,7 +71,7 @@ Our encrypted message should look like this:
 147191111
 ```
 
-### Decrypting
+# Decrypting
 In the **decrypting** process we use our **private key**, and the process in almost the same, except that, we use **d** our private exponent instead of **e**. So:
 ```
 (encrypted_character^d) % n
