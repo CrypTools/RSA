@@ -2,16 +2,17 @@ import random
 
 
 '''
-Euclid's algorithm for determining the greatest common divisor
-Use iteration to make it faster for larger integers
+    Euclid's algorithm for determining the greatest common divisor
+    Use iteration to make it faster for larger integers
 '''
-def gcd(a, b):
-    while b != 0:
-        a, b = b, a % b
-    return a
+def gcd(int_a, int_b):
+    while int_b != 0:
+        int_a, int_b = int_b, int_a % int_b
+    return int_a
 
 '''
-Euclid's extended algorithm for finding the multiplicative inverse of two numbers
+    Euclid's extended algorithm for finding the multiplicative inverse of two
+    numbers
 '''
 def multiplicative_inverse(e, phi):
     d = 0
@@ -38,58 +39,79 @@ def multiplicative_inverse(e, phi):
         return d + phi
 
 '''
-Tests to see if a number is prime.
+    Tests to see if a number is prime.
 '''
-def is_prime(num):
-    if num == 2:
+def is_prime(number):
+    if number == 2:
         return True
-    if num < 2 or num % 2 == 0:
+    # prime numbers can't be less divisible by two (except 2)
+    if number < 2 or number % 2 == 0:
         return False
-    for n in xrange(3, int(num**0.5)+2, 2):
-        if num % n == 0:
+    for n in xrange(3, int(number**0.5)+2, 2):
+        if number % n == 0:
             return False
     return True
 
-def generate_keypair(p, q):
-    if not (is_prime(p) and is_prime(q)):
+def generate_keypair(private_key, public_key):
+    #
+    if not (is_prime(private_key) and is_prime(public_key)):
         raise ValueError('Both numbers must be prime.')
-    elif p == q:
-        raise ValueError('p and q cannot be equal')
-    #n = pq
-    n = p * q
+    elif private_key == public_key:
+        raise ValueError('private_key and public_key cannot be equal')
+    # priv_times_pub = private_key * public_key
+    priv_times_pub = private_key * public_key #n
 
-    #Phi is the totient of n
-    phi = (p-1) * (q-1)
+    # Phi () is the totient of priv_times_pub
+    # Euler's totient function counts the positive integers up to a given
+    # integer a that are relatively prime to a
+    # (n) = (p-1) * (q-1)
+    phi = (private_key - 1) * (public_key - 1)
 
-    #Choose an integer e such that e and phi(n) are coprime
+    # Choose an integer e such that e and phi(priv_times_pub) are coprime
     e = random.randrange(1, phi)
 
-    #Use Euclid's Algorithm to verify that e and phi(n) are comprime
+    # priv_times_pub (n) and e make up the public_key
+
+    # Use Euclid's Algorithm to verify that e and phi(priv_times_pub) are coprime
+    # Two numbers are coprime if the only positive integer (factor) that
+    #  divides both of them is 1.
+    # Any prime number that divides one does not divide the other.
+    # This is equivalent to their greatest common divisor being 1
+    # so e * d mod  = 1
+    # phi must not share a factor with e
     g = gcd(e, phi)
     while g != 1:
         e = random.randrange(1, phi)
         g = gcd(e, phi)
 
-    #Use Extended Euclid's Algorithm to generate the private key
+    # Use Extended Euclid's Algorithm to generate the private key
+    # private exponente d, this is used to undo the effect of e
     d = multiplicative_inverse(e, phi)
 
-    #Return public and private keypair
-    #Public key is (e, n) and private key is (d, n)
-    return ((e, n), (d, n))
 
-def encrypt(pk, plaintext):
-    #Unpack the key into it's components
-    key, n = pk
+    # Return public and private keypair
+    # Public key is (e, priv_times_pub) and private key is (d, priv_times_pub)
+    return ((e, priv_times_pub), (d, priv_times_pub))
+
+def encrypt(private_key, plaintext):
+    # Encrypt: (m^e) % n
+
+    # Unpack the key into it's components
+    # here its e and n
+    e, n = private_key
     #Convert each letter in the plaintext to numbers based on the character using a^b mod m
-    cipher = [(ord(char) ** key) % n for char in plaintext]
+    cipher = [(ord(char) ** e) % n for char in plaintext]
     #Return the array of bytes
     return cipher
 
-def decrypt(pk, ciphertext):
-    #Unpack the key into its components
-    key, n = pk
+def decrypt(public_key, ciphertext):
+    # Decrypt: encrypted_c^d % n
+
+    # Unpack the key into its components
+    # here its d
+    d, n = public_key
     #Generate the plaintext based on the ciphertext and key using a^b mod m
-    plain = [chr((char ** key) % n) for char in ciphertext]
+    plain = [chr((char ** d) % n) for char in ciphertext]
     #Return the array of bytes as a string
     return ''.join(plain)
 
@@ -102,12 +124,12 @@ if __name__ == '__main__':
     p = int(raw_input("Enter a prime number (17, 19, 23, etc): "))
     q = int(raw_input("Enter another prime number (Not one you entered above): "))
     print "Generating your public/private keypairs now . . ."
-    public, private = generate_keypair(p, q)
-    print "Your public key is ", public ," and your private key is ", private
+    public_key, private_key = generate_keypair(p, q)
+    print "Your public key is ", public_key ," and your private key is ", private_key
     message = raw_input("Enter a message to encrypt with your private key: ")
-    encrypted_msg = encrypt(private, message)
+    encrypted_msg = encrypt(private_key, message)
     print "Your encrypted message is: "
     print ''.join(map(lambda x: str(x), encrypted_msg))
-    print "Decrypting message with public key ", public ," . . ."
+    print "Decrypting message with public key ", public_key ," . . ."
     print "Your message is:"
-    print decrypt(public, encrypted_msg)
+    print decrypt(public_key, encrypted_msg)
