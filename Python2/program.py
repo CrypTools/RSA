@@ -11,7 +11,6 @@ def gcd(a, b):
         # b = a % b
         # a = t
         a, b = b, a % b
-
     return a
 
 '''
@@ -45,14 +44,14 @@ def multiplicative_inverse(e, phi):
 '''
     Tests to see if a number is prime.
 '''
-def is_prime(number):
-    if number == 2:
+def is_prime(num):
+    if num == 2:
         return True
-    # prime numbers can't be less divisible by two (except 2)
-    if number < 2 or number % 2 == 0:
+    # prime nums can't be less divisible by two (except 2)
+    if num < 2 or num % 2 == 0:
         return False
-    for n in xrange(3, int(number**0.5)+2, 2):
-        if number % n == 0:
+    for n in xrange(3, int(num**0.5)+2, 2):
+        if num % n == 0:
             return False
     return True
 
