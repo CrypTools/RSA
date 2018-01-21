@@ -46,25 +46,38 @@ We use the Extended Euclid's Algorithm to generate **d**. This is a private expo
 98      d = multiplicative_inverse(e, phi)
 ```
 ### Public key and Private key
-With **n**, **e** and **d**, we can now get our public and private key pairs.
+With **n**, **e** and **d**, we can now get our **public** and **private** key pairs.
+
+```
+104     return ((e, p_times_q), (d, p_times_q))
+```
 ## Public key
 The **public key pair** is (**e**, **n**). This is what the server sends us, its public and anyone can read it.
 ## Private key
 The **private key pair** is (**d**, **n**). This can not be shared with anyone. It will be used to decrypt messages encrypted with the public key.
+
+
+### Encrypting
+For encrypting this is what we do:
+``` (m^e) % n```
+This function will use the public key to encrypt our plain text. We'll encrypt the string "asd".
+Let's first get our **e** and **n** from our **public key** pair. Then, we loop through each character in our string and get the Unicode value using **ord()** function. With this we then exponentiate that value by **e** and finally get the remainder with **mod n**.
 ```
-return ((e, p_times_q), (d, p_times_q))
+111     e, n = public_key
+129     plain = [(char ** d) % n for char in ciphertext]
+```
+Our encrypted message should look like this:
+```
+147191111
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-## Encryption
+### Decrypting
+In the **decrypting** process we use our **private key**, and the process in almost the same, except that, we use **d** our private exponent instead of **e**. So:
+```
+(encrypted_character^d) % n
+```
+Now we loop through each character performing our calculation. In the end we use **chr()** function to get our character back.
+```
+113     d, n = private_key
+115     plain = [chr((char ** d) % n) for char in ciphertext]
+```

@@ -5,10 +5,14 @@ import random
     Euclid's algorithm for determining the greatest common divisor
     Use iteration to make it faster for larger integers
 '''
-def gcd(int_a, int_b):
-    while int_b != 0:
-        int_a, int_b = int_b, int_a % int_b
-    return int_a
+def gcd(a, b):
+    while b != 0:
+        # t = b
+        # b = a % b
+        # a = t
+        a, b = b, a % b
+
+    return a
 
 '''
     Euclid's extended algorithm for finding the multiplicative inverse of two
@@ -52,69 +56,65 @@ def is_prime(number):
             return False
     return True
 
-def generate_keypair(private_key, public_key):
+def generate_keypair(prime_one, prime_two):
     #
-    if not (is_prime(private_key) and is_prime(public_key)):
+    if not (is_prime(prime_one) and is_prime(prime_two)):
         raise ValueError('Both numbers must be prime.')
-    elif private_key == public_key:
-        raise ValueError('private_key and public_key cannot be equal')
-    # priv_times_pub = private_key * public_key
-    priv_times_pub = private_key * public_key #n
+    elif prime_one == prime_two:
+        raise ValueError('prime_one and prime_two cannot be equal')
+    # n = prime_one * prime_two
+    p_times_q = prime_one * prime_two #n
 
-    # Phi () is the totient of priv_times_pub
-    # Euler's totient function counts the positive integers up to a given
-    # integer a that are relatively prime to a
-    # (n) = (p-1) * (q-1)
-    phi = (private_key - 1) * (public_key - 1)
+    # Phi () is the totient of p_times_q
+    # Euler's totient function counts the positive integers up to
+    # a given integer **a** that are relatively prime to **a**
+    # phi(n) = (p-1) * (q-1)
+    phi = (prime_one - 1) * (prime_two - 1)
 
-    # Choose an integer e such that e and phi(priv_times_pub) are coprime
-    e = random.randrange(1, phi)
+    # Choose an integer e such that e and phi(p_times_q) are coprime
+    e = random.randrange(1, phi+1)
 
-    # priv_times_pub (n) and e make up the public_key
-
-    # Use Euclid's Algorithm to verify that e and phi(priv_times_pub) are coprime
+    # phi must not share a factor with e
+    # Use Euclid's Algorithm to verify that e and phi(p_times_q) are coprime
     # Two numbers are coprime if the only positive integer (factor) that
     #  divides both of them is 1.
     # Any prime number that divides one does not divide the other.
     # This is equivalent to their greatest common divisor being 1
     # so e * d mod  = 1
-    # phi must not share a factor with e
-    g = gcd(e, phi)
+
+    g = gcd(e, phi) # if this returns one, then e is coprime with phi
+
     while g != 1:
-        e = random.randrange(1, phi)
+        e = random.randrange(1, phi+1)
         g = gcd(e, phi)
+    print e
 
     # Use Extended Euclid's Algorithm to generate the private key
     # private exponente d, this is used to undo the effect of e
     d = multiplicative_inverse(e, phi)
-
+    # print '(d*e)%phi == ', (d*e)%phi
 
     # Return public and private keypair
-    # Public key is (e, priv_times_pub) and private key is (d, priv_times_pub)
-    return ((e, priv_times_pub), (d, priv_times_pub))
+    # Public key is (e, p_times_q) and private key is (d, p_times_q)
+    return ((e, p_times_q), (d, p_times_q))
 
-def encrypt(private_key, plaintext):
+def encrypt(public_key, plaintext):
     # Encrypt: (m^e) % n
-
     # Unpack the key into it's components
-    # here its e and n
-    e, n = private_key
+    e, n = public_key
     #Convert each letter in the plaintext to numbers based on the character using a^b mod m
     cipher = [(ord(char) ** e) % n for char in plaintext]
     #Return the array of bytes
     return cipher
 
-def decrypt(public_key, ciphertext):
+def decrypt(private_key, ciphertext):
     # Decrypt: encrypted_c^d % n
-
     # Unpack the key into its components
-    # here its d
-    d, n = public_key
+    d, n = private_key
     #Generate the plaintext based on the ciphertext and key using a^b mod m
     plain = [chr((char ** d) % n) for char in ciphertext]
     #Return the array of bytes as a string
     return ''.join(plain)
-
 
 if __name__ == '__main__':
     '''
@@ -126,10 +126,10 @@ if __name__ == '__main__':
     print "Generating your public/private keypairs now . . ."
     public_key, private_key = generate_keypair(p, q)
     print "Your public key is ", public_key ," and your private key is ", private_key
-    message = raw_input("Enter a message to encrypt with your private key: ")
-    encrypted_msg = encrypt(private_key, message)
+    message = raw_input("Enter a message to encrypt with your public key: ")
+    encrypted_msg = encrypt(public_key, message)
     print "Your encrypted message is: "
     print ''.join(map(lambda x: str(x), encrypted_msg))
-    print "Decrypting message with public key ", public_key ," . . ."
+    print "Decrypting message with private key ", private_key ," . . ."
     print "Your message is:"
-    print decrypt(public_key, encrypted_msg)
+    print decrypt(private_key, encrypted_msg)
