@@ -64,7 +64,7 @@ This function will use the public key to encrypt our plain text. We'll encrypt t
 Let's first get our **e** and **n** from our **public key** pair. Then, we loop through each character in our string and get the Unicode value using **ord()** function. With this we then exponentiate that value by **e** and finally get the remainder with **mod n**.
 ```
 111     e, n = public_key
-129     plain = [(char ** d) % n for char in ciphertext]
+129     plain = [(ord(char) ** e) % n for char in ciphertext]
 ```
 Our encrypted message should look like this:
 ```
