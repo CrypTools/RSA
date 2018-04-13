@@ -80,7 +80,7 @@ int main()
 mpz_class z_powm(const mpz_class base, mpz_class exponent, const mpz_class modulo)
 {
     mpz_class x=1, y=base;
-    while (exponent){
+    while (exponent>0){
         if (exponent % 2 == 1)
             x = (x*y) % modulo;
         y = (y*y) % modulo;
