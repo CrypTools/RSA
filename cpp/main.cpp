@@ -1,6 +1,8 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include <thread>
+#include <mutex>
 #include <gmpxx.h>
 using namespace std;
 
@@ -16,9 +18,52 @@ void z_generate_keypair(const mpz_class prime_one, const mpz_class prime_two, mp
 void z_encrypt(const mpz_class* z_key, const char* plaintext, const int lenght, mpz_class* result);
 void z_decrypt(const mpz_class* z_key, const mpz_class* cipher, const int lenght, char* result);
 
-int main()
+void display_help();
+
+bool char_comparison(const char* char1, const char* char2);
+
+int main(int argc, char* argv[])
 {
     srand(time(NULL));
+
+    bool skip_check = false, multi_thread = false, show_help = false, known_args = true;
+
+    char help_syntax[7]         = "--help"          ,      help_syntax_short[3]        = "-h", //c'est plus joli comme ça ^^
+         skip_syntax[7]         = "--skip"          ,      skip_syntax_short[3]        = "-s",
+         multithread_syntax[14] = "--multithread"   ,      multithread_syntax_short[3] = "-j";
+
+    for (int i=1; i<argc; ++i){
+        if          (char_comparison(argv[i], help_syntax)        == true    ||   char_comparison(argv[i], help_syntax_short)        == true)  show_help = true;
+        else if     (char_comparison(argv[i], skip_syntax)        == true    ||   char_comparison(argv[i], skip_syntax_short)        == true)  skip_check = true;
+        else if     (char_comparison(argv[i], multithread_syntax) == true    ||   char_comparison(argv[i], multithread_syntax_short) == true)  multi_thread = true;
+        else {
+            known_args = false;
+            cout << endl << "Unknow argument: " << argv[i] << endl;
+        }
+    }
+
+    if (known_args != true){
+        cout << endl << "Type -h or --help to display the arguments list." << endl << endl <<
+        "Exit 2." << endl;
+        return 2;
+    }
+
+    if (show_help == true) {
+        display_help();
+        return 0;
+    }
+
+    if (skip_check)
+        cout << endl << "Prime numbers check is disabled." << endl;
+    else
+        cout << endl << "Prime numbers check is enabled (default)." << endl;
+
+    if (multi_thread)
+        cout << endl << "Multithreading is enabled." << endl;
+    else
+        cout << endl << "Multithreading is disabled (default)." << endl;
+
+    cout << endl << endl;
 
     mpz_class input_prime_one, input_prime_two, key_pair[3], encrypted_text[MAX_TEXT_LENGHT];
     char input_plaintext[MAX_TEXT_LENGHT], decrypted_text[MAX_TEXT_LENGHT];
@@ -28,6 +73,7 @@ int main()
     cout << "Enter a prime number: ";
     cin >> input_prime_one;
 
+    if (skip_check == false)
     if (!z_isPrime(input_prime_one)){ //Optional
         cout << endl << "This is not a prime number !" << endl << endl << "Exit 1" << endl;
         return 1;
@@ -41,6 +87,7 @@ int main()
         return 1;
     }
 
+    if (skip_check == false)
     if (!z_isPrime(input_prime_two)){ //Optional
         cout << endl << "This is not a prime number !" << endl << endl << "Exit 1" << endl;
         return 1;
@@ -183,5 +230,23 @@ bool z_isPrime(mpz_class number)
         if(number%i==0)
             return false;
     }
+    return true;
+}
+
+void display_help()
+{
+    cout << endl << "Arguments:" << endl << "   -h ,  --help        : Displays this help message" <<
+                                    endl << "   -s ,  --skip        : Skip prime numbres check (saves a lot of time)" <<
+                                    endl << "   -j ,  --multithread : Enable multithreading" << endl << endl;
+    return;
+}
+
+bool char_comparison(const char* char1, const char* char2)
+{
+    if (strlen(char1) != strlen(char2)) return false;
+
+    for (unsigned int i=0; i<strlen(char1); ++i)
+        if (char1[i] != char2[i]) return false;
+
     return true;
 }
